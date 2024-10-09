@@ -9,52 +9,58 @@ const TodoList = () => {
     "Take my dog to get a grooming",
   ]);
   const [newTodo, setNewTodo] = useState("");
-  //API
-
   const API_URL = "https://playground.4geeks.com/todo/users/Joaquin95";
 
+  //API
+
   useEffect(() => {
-    fetch(API_URL)
-      .then((response) => response.json())
-      .then((data) => {
+    const fetchTodos = async () => {
+      const response = await fetch(API_URL);
+      const data = await response.json();
+      console.log("Fetched data:", data);
+
+      if (Array.isArray(data)) {
         setTodos(data);
-        console.log("Fetched todos:", data);
-        setTodos(data);
-      });
+      } else {
+        console.error("Fetched data is not an array:", data);
+        setTodos([]);
+      }
+    };
+    fetchTodos();
   }, []);
 
-  const addTodo = (e) => {
+  const addTodo = async (e) => {
     e.preventDefault();
     if (newTodo.trim() !== "") {
       const updatedTodos = [...todos, { label: newTodo, done: false }];
       setTodos(updatedTodos);
       setNewTodo("");
 
-      fetch(API_URL, {
+      await fetch(API_URL, {
         method: "PUT",
         body: JSON.stringify(updatedTodos),
         headers: { "Content-Type": "application/json" },
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log("Todos synced:", data);
-        });
+      });
     }
   };
 
-  const removeTodo = (index) => {
+  const removeTodo = async (index) => {
     const updatedTodos = todos.filter((_, i) => i !== index);
     setTodos(updatedTodos);
 
-    fetch(API_URL, {
+    await fetch(API_URL, {
       method: "PUT",
       body: JSON.stringify(updatedTodos),
       headers: { "Content-Type": "application/json" },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Todos synced:", data);
-      });
+    });
+  };
+
+  const clearTodos = async () => {
+    setTodos([]);
+    await fetch(API_URL, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+    });
   };
 
   return (
