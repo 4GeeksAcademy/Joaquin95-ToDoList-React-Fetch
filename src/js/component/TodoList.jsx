@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 //create your first component
 const TodoList = () => {
@@ -9,113 +9,53 @@ const TodoList = () => {
     "Take my dog to get a grooming",
   ]);
   const [newTodo, setNewTodo] = useState("");
+  //API
 
-  //Changed "addtodo" to "addtodolist" for line 69
-  const addTodolist = (e) => {
+  const API_URL = "https://playground.4geeks.com/todo/users/Joaquin95";
+
+  useEffect(() => {
+    fetch(API_URL)
+      .then((response) => response.json())
+      .then((data) => {
+        setTodos(data);
+        console.log("Fetched todos:", data);
+        setTodos(data);
+      });
+  }, []);
+
+  const addTodo = (e) => {
     e.preventDefault();
     if (newTodo.trim() !== "") {
-      setTodos([...todos, newTodo]);
+      const updatedTodos = [...todos, { label: newTodo, done: false }];
+      setTodos(updatedTodos);
       setNewTodo("");
+
+      fetch(API_URL, {
+        method: "PUT",
+        body: JSON.stringify(updatedTodos),
+        headers: { "Content-Type": "application/json" },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Todos synced:", data);
+        });
     }
   };
 
   const removeTodo = (index) => {
-    const updatedTodos = todos.filter((todo, i) => i !== index);
+    const updatedTodos = todos.filter((_, i) => i !== index);
     setTodos(updatedTodos);
-  };
-  const [error, setError] = useState(null);
-  const API_URL = "https://playground.4geeks.com/todo/docs#/";
 
-  const fetchTodos = async () => {
-    await fetch(API_URL)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to fetch todos");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setTodos(data);
-      })
-      .catch((error) => {
-        setError(error.message);
-      });
-  };
-
-  useEffect(() => {
-    fetchTodos();
-  }, []);
-
-  const syncTodosWithServer = () => {
     fetch(API_URL, {
       method: "PUT",
-      body: JSON.stringify(todos),
-      headers: {
-        "Content-type": "application/json",
-      },
+      body: JSON.stringify(updatedTodos),
+      headers: { "Content-Type": "application/json" },
     })
-      .then((resp) => {
-        console.log(resp.ok);
-        console.log(resp.status);
-        return resp.json();
-      })
+      .then((response) => response.json())
       .then((data) => {
-        console.log(data);
-      })
-      .catch((error) => {
-        console.error(error);
+        console.log("Todos synced:", data);
       });
   };
-
-  const addTodo = async (e) => {
-    e.preventDefault();
-    if (newTodo.trim() === "") return;
-
-    const newTask = {
-      title: newTodo,
-      completed: false,
-    };
-
-    await fetch('https://playground.4geeks.com/todo/users/Joaquin95-ToDoList-React_Fetch', {
-      method: "POST",
-      headers: {
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify(newTask),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to add todo");
-        }
-        return response.json();
-      })
-      .then((addTodo) => {
-        setTodos([...todos, addedTodo]);
-        setNewTodo("");
-        syncTodosWithServer();
-      })
-      .catch((error) => {
-        setError(error.message);
-      });
-  };
-
-  const deleteTodo = async (id) => {
-    await fetch("${API_URL}/${id}", {
-      method: "DELETE",
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to delete todo");
-        }
-        setTodos(todos.filter((todo) => todo.id !== id));
-        syncTodosWithServer();
-      })
-      .catch((error) => {
-        setError(error.message);
-      });
-  };
-
-  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="todo-container">
@@ -141,7 +81,7 @@ const TodoList = () => {
         ))}
       </ul>
       <div className="todo-footer">
-        {todos.length} item{todos.length !== 1 ? "s" : ""} left
+        {todos.length} {todos.length === 1 ? "item" : "items"} left
       </div>
     </div>
   );
