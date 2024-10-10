@@ -3,10 +3,10 @@ import React, { useState, useEffect } from "react";
 //create your first component
 const TodoList = () => {
   const [todos, setTodos] = useState([
-    "Make the bed",
-    "Wash the cars",
-    "Start coding",
-    "Take my dog to get a grooming",
+    { label: "Make the bed", done: false },
+    { label: "Wash the cars", done: false },
+    { label: "Feed the dogs", done: false },
+    { label: "Take my dog to get a grooming", done: false },
   ]);
   const [newTodo, setNewTodo] = useState("");
   const API_URL = "https://playground.4geeks.com/todo/users/Joaquin95";
@@ -14,18 +14,17 @@ const TodoList = () => {
   //API
 
   useEffect(() => {
+
     const fetchTodos = async () => {
-      const response = await fetch(API_URL);
-      const data = await response.json();
+      let response = await fetch("https://playground.4geeks.com/todo/users/Joaquin95");
+      let data = await response.json();
       console.log("Fetched data:", data);
 
       if (Array.isArray(data)) {
         setTodos(data);
-      } else {
-        console.error("Fetched data is not an array:", data);
-        setTodos([]);
       }
     };
+
     fetchTodos();
   }, []);
 
@@ -36,7 +35,7 @@ const TodoList = () => {
       setTodos(updatedTodos);
       setNewTodo("");
 
-      await fetch(API_URL, {
+      await fetch("https://playground.4geeks.com/todo/users/Joaquin95", {
         method: "PUT",
         body: JSON.stringify(updatedTodos),
         headers: { "Content-Type": "application/json" },
@@ -45,10 +44,10 @@ const TodoList = () => {
   };
 
   const removeTodo = async (index) => {
-    const updatedTodos = todos.filter((_, i) => i !== index);
+    let updatedTodos = todos.filter((_, i) => i !== index);
     setTodos(updatedTodos);
 
-    await fetch(API_URL, {
+    await fetch("https://playground.4geeks.com/todo/users/Joaquin95", {
       method: "PUT",
       body: JSON.stringify(updatedTodos),
       headers: { "Content-Type": "application/json" },
@@ -57,7 +56,7 @@ const TodoList = () => {
 
   const clearTodos = async () => {
     setTodos([]);
-    await fetch(API_URL, {
+    await fetch("https://playground.4geeks.com/todo/users/Joaquin95", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
     });
@@ -79,7 +78,7 @@ const TodoList = () => {
       <ul className="todo-list">
         {todos.map((todo, index) => (
           <li key={index} className="todo-item">
-            {todo}
+            {todo.label}
             <button onClick={() => removeTodo(index)} className="delete-button">
               ✖
             </button>
