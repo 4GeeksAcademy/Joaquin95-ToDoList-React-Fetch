@@ -31,7 +31,7 @@ const TodoList = () => {
   const addTodo = async (e) => {
     e.preventDefault();
     if (newTodo.trim() !== "") {
-      const updatedTodos = [...todos, { label: newTodo, done: false }];
+      let updatedTodos = [...todos, { label: newTodo, done: false }];
       setTodos(updatedTodos);
       setNewTodo("");
 
