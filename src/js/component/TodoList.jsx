@@ -11,12 +11,29 @@ const TodoList = () => {
   const [newTodo, setNewTodo] = useState("");
   const API_URL = "https://playground.4geeks.com/todo/users/Joaquin95";
 
-  //API
-
+ 
   useEffect(() => {
+    const UserExists = async () => {
+      let response = await fetch("https://playground.4geeks.com/todo/users/Joaquin95");
+      let data = await response.json();
+
+
+      if (data.slug !== "Joaquin95") {
+   
+        await fetch("https://playground.4geeks.com/todo/users/Joaquin95", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify([]),
+        });
+        console.log("User created: Joaquin95");
+      }
+      
+   
+      fetchTodos();
+    };
 
     const fetchTodos = async () => {
-      let response = await fetch("https://playground.4geeks.com/todo/users/Joaquin95");
+      let response = await fetch(API_URL);
       let data = await response.json();
       console.log("Fetched data:", data);
 
@@ -25,7 +42,7 @@ const TodoList = () => {
       }
     };
 
-    fetchTodos();
+    UserExists();
   }, []);
 
   const addTodo = async (e) => {
@@ -64,7 +81,7 @@ const TodoList = () => {
 
   return (
     <div className="todo-container">
-      <h1 className="todo-title">todos</h1>
+      <h1 className="todo-title">Todos</h1>
       <form onSubmit={addTodo}>
         <input
           type="text"
@@ -91,4 +108,5 @@ const TodoList = () => {
     </div>
   );
 };
+
 export default TodoList;
